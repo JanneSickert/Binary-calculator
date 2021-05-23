@@ -6,6 +6,8 @@ D_ADDITION			EQU P3.1
 D_SUBSTRACTION		EQU P3.2
 D_MULTIPLICATION	EQU P3.3
 D_DIVISION			EQU P3.4
+RESULT_TO_INPUT_1	EQU P3.5
+D_CARRY				EQU P3.7
 
 ORG 0h
 LJMP Main
@@ -24,6 +26,7 @@ RET
 
 Wait:
 	JB D_ENTER, Calculate
+	JB RESULT_TO_INPUT_1, PutUp
 	JMP Wait
 
 Calculate:
@@ -88,7 +91,23 @@ Division:
 	JMP GetResult
 
 GetResult:
+	JC SetCarry
 	MOV RESULT, @R0
+	INC R0
+	LJMP Wait
+	
+SetCarry:
+	SETB D_CARRY
+	INC @R0
+	MOV RESULT, @R0
+	INC R0
+	LJMP Wait
+
+PutUp:
+	CLR RESULT_TO_INPUT_1
+	MOV R4, RESULT
+	MOV RESULT, #0d
+	MOV INPUT_1, R4
 	LJMP Wait
 
 END
