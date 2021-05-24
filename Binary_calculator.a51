@@ -124,21 +124,35 @@ PutUp:
 ShowLast:
 	CLR LAST_RESULT
 	CJNE R0, #30h, Last
-		JMP ShowEnd
+		JMP ErrorShowLast
 	Last:
 		CJNE R3, #0d, NextLast
 		DEC R0
 	CJNE R0, #30h, LLLL
-		JMP ShowEnd
+		JMP ErrorShowLast
 	LLLL:
 		DEC R0
 		MOV R3, #1d
 		MOV RESULT, @R0
-		JMP ShowEnd
+		LJMP Wait
 	NextLast:
 		DEC R0
 		MOV RESULT, @R0
-	ShowEnd:
 		LJMP Wait
+
+ErrorShowLast:
+	MOV A, #1d
+	MOV R1, #0d
+	Sesl:
+		MOV RESULT, A
+		LCALL Delay
+		JB D_ENTER, JumpCalculate
+		RL A
+		INC R1
+		CJNE R1, #7d, Sesl
+		JMP ErrorShowLast
+
+JumpCalculate:
+	LJMP Calculate
 
 END
