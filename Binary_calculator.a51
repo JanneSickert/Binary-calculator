@@ -7,6 +7,7 @@ D_SUBSTRACTION		EQU P3.2
 D_MULTIPLICATION	EQU P3.3
 D_DIVISION			EQU P3.4
 RESULT_TO_INPUT_1	EQU P3.5
+LAST_RESULT			EQU P3.6
 D_CARRY				EQU P3.7
 
 ORG 0h
@@ -14,6 +15,8 @@ LJMP Main
 
 Main:
 	MOV R0, #30h
+	MOV A, R0
+	MOV R2, A
 	CALL ClearPorts
 	JMP Wait
 
@@ -27,10 +30,14 @@ RET
 Wait:
 	JB D_ENTER, Calculate
 	JB RESULT_TO_INPUT_1, PutUp
+	JB LAST_RESULT, ShowLast
 	JMP Wait
 
 Calculate:
 	CLR D_ENTER
+	MOV R3, #0d
+	MOV A, R2
+	MOV R0, A
 	MOV R7, P3
 	MOV R6, INPUT_1			;Storage INPUT_1
 	MOV R5, INPUT_2			;Storage INPUT_2
@@ -94,6 +101,8 @@ GetResult:
 	JC SetCarry
 	MOV RESULT, @R0
 	INC R0
+	MOV A, R0
+	MOV R2, A
 	LJMP Wait
 	
 SetCarry:
@@ -101,6 +110,8 @@ SetCarry:
 	INC @R0
 	MOV RESULT, @R0
 	INC R0
+	MOV A, R0
+	MOV R2, A
 	LJMP Wait
 
 PutUp:
@@ -109,5 +120,25 @@ PutUp:
 	MOV RESULT, #0d
 	MOV INPUT_1, R4
 	LJMP Wait
+
+ShowLast:
+	CLR LAST_RESULT
+	CJNE R0, #30h, Last
+		JMP ShowEnd
+	Last:
+		CJNE R3, #0d, NextLast
+		DEC R0
+	CJNE R0, #30h, LLLL
+		JMP ShowEnd
+	LLLL:
+		DEC R0
+		MOV R3, #1d
+		MOV RESULT, @R0
+		JMP ShowEnd
+	NextLast:
+		DEC R0
+		MOV RESULT, @R0
+	ShowEnd:
+		LJMP Wait
 
 END
